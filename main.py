@@ -9,15 +9,18 @@ from openai import OpenAI
 from pdf2image import convert_from_path
 from dotenv import load_dotenv
 
-# Constants
-PDF_DIR = 'PDFs'
-SUMMARY_DIR = 'Summaries'
-TMP_IMG_DIR = 'tmp_slide_imgs'
+# Load environment variables
+load_dotenv()
+
+# Constants - can be overridden via environment variables
+PDF_DIR = os.getenv('PDF_DIR', 'PDFs')
+SUMMARY_DIR = os.getenv('SUMMARY_DIR', 'Summaries')
+TMP_IMG_DIR = os.getenv('TMP_IMG_DIR', 'tmp_slide_imgs')
 
 # Groq model names and API endpoint
-VISION_MODEL = 'meta-llama/llama-4-scout-17b-16e-instruct'
-TEXT_MODEL = 'openai/gpt-oss-20b'
-API_BASE_URL = 'https://api.groq.com/openai/v1'
+VISION_MODEL = os.getenv('VISION_MODEL', 'meta-llama/llama-4-scout-17b-16e-instruct')
+TEXT_MODEL = os.getenv('TEXT_MODEL', 'openai/gpt-oss-20b')
+API_BASE_URL = os.getenv('API_BASE_URL', 'https://api.groq.com/openai/v1')
 
 VISION_PROMPT = (
     "Provide a detailed, faithful summary of this lecture slide. "
@@ -61,28 +64,36 @@ TEXT_PROMPT = (
     "- Prefer concise bullet points over long paragraphs.\n"
 )
 
-MAX_IMG_PIXELS = 33_000_000
-MAX_IMG_SIZE_MB = 4
+MAX_IMG_PIXELS = int(os.getenv('MAX_IMG_PIXELS', '33000000'))
+MAX_IMG_SIZE_MB = int(os.getenv('MAX_IMG_SIZE_MB', '4'))
 
 # How many slide summaries to send to the text model at once
-SLIDES_PER_BATCH = 20
+SLIDES_PER_BATCH = int(os.getenv('SLIDES_PER_BATCH', '20'))
 
 
 def load_api_key():
-	load_dotenv()
+	"""Load and validate the Groq API key from environment variables."""
 	key = os.getenv('GROQ_API_KEY')
-	if not key:
-		print('GROQ_API_KEY not found in .env')
+	if not key or key == 'your_api_key_here':
+		print('Error: GROQ_API_KEY not found or not configured in .env file')
+		print('Please copy .env.template to .env and add your API key')
 		sys.exit(1)
 	return key
 
 
 def ensure_dirs():
-	os.makedirs(SUMMARY_DIR, exist_ok=True)
-	os.makedirs(TMP_IMG_DIR, exist_ok=True)
+	"""Create required directories if they don't exist."""
+	try:
+		os.makedirs(PDF_DIR, exist_ok=True)
+		os.makedirs(SUMMARY_DIR, exist_ok=True)
+		os.makedirs(TMP_IMG_DIR, exist_ok=True)
+	except Exception as e:
+		print(f'Error: Failed to create directories: {e}')
+		sys.exit(1)
 
 
 def pdf_to_jpegs(pdf_path, out_dir):
+	"""Convert PDF pages to JPEG images with size constraints."""
 	try:
 		images = convert_from_path(pdf_path, fmt='jpeg')
 	except Exception as e:
@@ -101,7 +112,7 @@ def pdf_to_jpegs(pdf_path, out_dir):
 		img.save(img_path, 'JPEG')
 		# Check file size
 		if os.path.getsize(img_path) > MAX_IMG_SIZE_MB * 1024 * 1024:
-			print(f'Slide {idx+1} in {pdf_path} exceeds {MAX_IMG_SIZE_MB}MB after resizing, skipping.')
+			print(f'Warning: Slide {idx+1} in {pdf_path} exceeds {MAX_IMG_SIZE_MB}MB after resizing, skipping.')
 			os.remove(img_path)
 			continue
 		img_paths.append(img_path)
@@ -109,6 +120,7 @@ def pdf_to_jpegs(pdf_path, out_dir):
 
 
 def call_groq_vision(client, img_path, retries=3):
+	"""Call Groq vision API to summarize a slide image."""
 	with open(img_path, 'rb') as f:
 		img_bytes = f.read()
 	img_b64 = base64.b64encode(img_bytes).decode()
@@ -126,20 +138,21 @@ def call_groq_vision(client, img_path, retries=3):
 			)
 			return response.choices[0].message.content.strip()
 		except Exception as e:
-			print(f'Vision API call failed: {e}')
-			time.sleep(2)
+			print(f'Warning: Vision API call failed (attempt {attempt+1}/{retries}): {e}')
+			if attempt < retries - 1:
+				time.sleep(2 ** attempt)  # Exponential backoff
+	print(f'Error: Vision API failed after {retries} attempts for {img_path}')
 	return '[Vision API failed]'
 
 
 def batch_slide_summaries(slide_summaries, batch_size=SLIDES_PER_BATCH):
-    """
-    Yield successive batches of slide summaries of size at most batch_size.
-    """
+    """Yield successive batches of slide summaries of size at most batch_size."""
     for i in range(0, len(slide_summaries), batch_size):
         yield slide_summaries[i:i + batch_size]
 
 
 def call_groq_text(client, prompt, retries=3):
+	"""Call Groq text API to generate or refine notes."""
 	for attempt in range(retries):
 		try:
 			response = client.chat.completions.create(
@@ -151,17 +164,22 @@ def call_groq_text(client, prompt, retries=3):
 			)
 			return response.choices[0].message.content.strip()
 		except Exception as e:
-			print(f'Text API call failed: {e}')
-			time.sleep(2)
+			print(f'Warning: Text API call failed (attempt {attempt+1}/{retries}): {e}')
+			if attempt < retries - 1:
+				time.sleep(2 ** attempt)  # Exponential backoff
+	print(f'Error: Text API failed after {retries} attempts')
 	return '[Text API failed]'
 
 
 def refine_notes_with_batch(client, current_notes, batch_summaries):
-	"""
-	current_notes: str or None
-	batch_summaries: list[str] (subset of slides, already from vision)
-
-	Returns updated notes (str).
+	"""Refine notes with a batch of slide summaries.
+	
+	Args:
+		current_notes: Existing notes (str) or None for first batch
+		batch_summaries: List of slide summaries to integrate
+		
+	Returns:
+		Updated notes as string
 	"""
 	batch_block = '\n'.join(batch_summaries)
 
@@ -197,13 +215,15 @@ def refine_notes_with_batch(client, current_notes, batch_summaries):
 
 
 def rolling_batched_summarize(client, slide_summaries, batch_size=SLIDES_PER_BATCH, lecture_name=""):
-    """
-    slide_summaries: list[str] (one per slide, already from vision)
-    Returns final lecture notes as a single string.
-
-    Strategy:
-      - Split slide summaries into batches.
-      - For each batch, refine a running set of global notes.
+    """Generate final lecture notes using batched processing.
+    
+    Args:
+        slide_summaries: List of slide summaries from vision API
+        batch_size: Number of slides to process per batch
+        lecture_name: Name of the lecture for progress display
+        
+    Returns:
+        Final lecture notes as a single string
     """
     notes = None
     batches = list(batch_slide_summaries(slide_summaries, batch_size=batch_size))
@@ -219,11 +239,12 @@ def rolling_batched_summarize(client, slide_summaries, batch_size=SLIDES_PER_BAT
 
 
 def process_pdf(pdf_path, client):
+	"""Process a single PDF file into lecture notes."""
 	lecture_name = os.path.splitext(os.path.basename(pdf_path))[0]
 	img_dir = TMP_IMG_DIR
 	img_paths = pdf_to_jpegs(pdf_path, img_dir)
 	if not img_paths:
-		print(f'No valid slides found in {pdf_path}.')
+		print(f'Warning: No valid slides found in {pdf_path}')
 		return
 	slide_summaries = []
 
@@ -246,7 +267,7 @@ def process_pdf(pdf_path, client):
 
 	# Write output
 	out_path = os.path.join(SUMMARY_DIR, f'{lecture_name}.md')
-	with open(out_path, 'w') as f:
+	with open(out_path, 'w', encoding='utf-8') as f:
 		f.write(f'# {lecture_name}\n\n')
 		f.write('## Study Notes\n\n')
 		f.write(lecture_notes + '\n\n')
@@ -255,28 +276,33 @@ def process_pdf(pdf_path, client):
 		for idx, summary in enumerate(slide_summaries):
 			f.write(f'### Slide {idx+1}\n\n')
 			f.write(summary.replace(f'Slide {idx+1}: ', '') + '\n\n')
-	print(f'  Output written to {out_path}')
+	print(f'Output written to {out_path}')
 
 	# Clean up images
 	for img_path in img_paths:
 		try:
 			os.remove(img_path)
-		except Exception as e:
-			print(f'  Could not delete {img_path}: {e}')
+		except Exception:
+			pass
 
 def main():
+	"""Main entry point for the lecture parser."""
 	ensure_dirs()
 	api_key = load_api_key()
 	client = OpenAI(base_url=API_BASE_URL, api_key=api_key)
+	
 	pdfs = glob.glob(os.path.join(PDF_DIR, '*.pdf'))
 	if not pdfs:
-		print('No PDF files found in PDFs/.')
+		print(f'No PDF files found in {PDF_DIR}/')
 		return
+	
 	for pdf_path in pdfs:
 		process_pdf(pdf_path, client)
+	
 	# Clean up tmp dir
 	try:
-		shutil.rmtree(TMP_IMG_DIR)
+		if os.path.exists(TMP_IMG_DIR):
+			shutil.rmtree(TMP_IMG_DIR)
 	except Exception:
 		pass
 
