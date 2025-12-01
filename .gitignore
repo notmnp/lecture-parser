@@ -1,3 +1,4 @@
 PDFs/*
+!PDFs/.gitkeep
 tmp_slide_imgs/
 .env
