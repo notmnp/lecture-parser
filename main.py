@@ -18,6 +18,7 @@ TMP_IMG_DIR = 'tmp_slide_imgs'
 VISION_MODEL = 'meta-llama/llama-4-scout-17b-16e-instruct'
 TEXT_MODEL = 'openai/gpt-oss-20b'
 API_BASE_URL = 'https://api.groq.com/openai/v1'
+
 VISION_PROMPT = (
     "Provide a detailed, faithful summary of this lecture slide. "
     "Capture ALL content: equations, formulas, definitions, bullet points, and any written text. "
@@ -25,28 +26,47 @@ VISION_PROMPT = (
     "Do not omit or simplify — include more detail rather than less, so no context is lost. "
     "This is not a final summary; it is a comprehensive capture of everything on the slide for later distillation."
 )
+
 TEXT_PROMPT = (
     "You are given detailed slide-by-slide summaries of a lecture. "
-    "Rewrite them into *exam study notes* that are also easy to understand "
-    "for someone not yet fully comfortable with the material. "
-    "Important rules: "
-	"- THESE STUDY NOTES WILL BE SAVED AS A MARKDOWN FILE. SO USE MARKDOWN SYNTAX. "
-    "- FORMATTING GUIDELINES FOR MATH: Use standard Markdown LaTeX format: "
-    "  * For inline math, use single dollar signs: $formula$ (NOT \\(formula\\)) "
-    "  * For block math, use double dollar signs: $$formula$$ (NOT \\[formula\\]) "
-    "  * Never use escaped backslashes like \\( or \\[ for math delimiters "
-    "  * Always check that all math expressions are properly formatted "
-    "- DO NOT mention slides, slide numbers, or page numbers. "
-    "- DO NOT organize content by slide. "
-    "- Keep only the essential equations, definitions, and canonical examples. "
-    "- **Add short plain-language explanations or analogies to make the learning intuitive.** "
-    "- Eliminate all instructions, problem statements, and filler prose. "
-    "- Do not repeat concepts. "
-    "- Use clean bullet points with equations/concepts + concise explanations. "
-    "- Think of it as a one-page cheat sheet that is both compact and understandable."
+    "Rewrite them into *problem-solving-focused exam notes* for a student who wants to know:\n"
+    "  - What formulas and definitions they must know\n"
+    "  - What the main concepts and ideas are\n"
+    "  - How to approach typical problems step by step\n"
+    "\n"
+    "Important rules:\n"
+    "- THESE STUDY NOTES WILL BE SAVED AS A MARKDOWN FILE. SO USE MARKDOWN SYNTAX.\n"
+    "- Use clear section headings such as:\n"
+    "  - Core Formulas & Definitions\n"
+    "  - Key Concepts & Intuition\n"
+    "  - Problem-Solving Strategies\n"
+    "  - Common Pitfalls & Checks\n"
+    "- FORMATTING GUIDELINES FOR MATH: Use standard Markdown LaTeX format:\n"
+    "  * For inline math, use single dollar signs: $formula$ (NOT \\(formula\\))\n"
+    "  * For block math, use double dollar signs: $$formula$$ (NOT \\[formula\\])\n"
+    "  * Never use escaped backslashes like \\( or \\[ for math delimiters\n"
+    "  * Always check that all math expressions are properly formatted\n"
+    "- DO NOT mention slides, slide numbers, or page numbers.\n"
+    "- DO NOT organize content by slide.\n"
+    "- For each IMPORTANT formula:\n"
+    "  * Give the formula in LaTeX\n"
+    "  * Explain what each symbol means\n"
+    "  * State when/why you would use it (typical problem patterns)\n"
+    "- For problem-solving strategies, describe:\n"
+    "  * Typical cues in the question (e.g., keywords, structures)\n"
+    "  * A short step-by-step approach or checklist\n"
+    "  * Any common mistakes to avoid\n"
+    "- Eliminate filler prose, agenda items, and purely decorative content.\n"
+    "- Avoid repeating the same concept multiple times.\n"
+    "- Prefer concise bullet points over long paragraphs.\n"
 )
+
 MAX_IMG_PIXELS = 33_000_000
 MAX_IMG_SIZE_MB = 4
+
+# How many slide summaries to send to the text model at once
+SLIDES_PER_BATCH = 20
+
 
 def load_api_key():
 	load_dotenv()
@@ -56,9 +76,11 @@ def load_api_key():
 		sys.exit(1)
 	return key
 
+
 def ensure_dirs():
 	os.makedirs(SUMMARY_DIR, exist_ok=True)
 	os.makedirs(TMP_IMG_DIR, exist_ok=True)
+
 
 def pdf_to_jpegs(pdf_path, out_dir):
 	try:
@@ -85,6 +107,7 @@ def pdf_to_jpegs(pdf_path, out_dir):
 		img_paths.append(img_path)
 	return img_paths
 
+
 def call_groq_vision(client, img_path, retries=3):
 	with open(img_path, 'rb') as f:
 		img_bytes = f.read()
@@ -107,14 +130,23 @@ def call_groq_vision(client, img_path, retries=3):
 			time.sleep(2)
 	return '[Vision API failed]'
 
-def call_groq_text(client, summary_block, retries=3):
+
+def batch_slide_summaries(slide_summaries, batch_size=SLIDES_PER_BATCH):
+    """
+    Yield successive batches of slide summaries of size at most batch_size.
+    """
+    for i in range(0, len(slide_summaries), batch_size):
+        yield slide_summaries[i:i + batch_size]
+
+
+def call_groq_text(client, prompt, retries=3):
 	for attempt in range(retries):
 		try:
 			response = client.chat.completions.create(
 				model=TEXT_MODEL,
 				messages=[{
 					"role": "user",
-					"content": TEXT_PROMPT + "\n\n" + summary_block
+					"content": prompt
 				}]
 			)
 			return response.choices[0].message.content.strip()
@@ -122,6 +154,69 @@ def call_groq_text(client, summary_block, retries=3):
 			print(f'Text API call failed: {e}')
 			time.sleep(2)
 	return '[Text API failed]'
+
+
+def refine_notes_with_batch(client, current_notes, batch_summaries):
+	"""
+	current_notes: str or None
+	batch_summaries: list[str] (subset of slides, already from vision)
+
+	Returns updated notes (str).
+	"""
+	batch_block = '\n'.join(batch_summaries)
+
+	if current_notes is None:
+		# First batch: create notes from scratch
+		prompt = (
+			TEXT_PROMPT
+			+ "\n\nHere are detailed slide summaries from a lecture:\n\n"
+			+ batch_block
+			+ "\n\nProduce well-structured Markdown exam notes that are focused on problem solving:\n"
+			"- Highlight the essential formulas, definitions, and main ideas.\n"
+			"- Explain when and how to use each formula in typical problems.\n"
+			"- Include short step-by-step strategies or checklists for common problem types.\n"
+			"- Avoid unnecessary repetition."
+		)
+	else:
+		# Subsequent batches: update existing notes with new material
+		prompt = (
+			TEXT_PROMPT
+			+ "\n\nHere are the current draft study notes:\n\n"
+			+ current_notes
+			+ "\n\nHere are additional detailed slide summaries from later slides:\n\n"
+			+ batch_block
+			+ "\n\nUpdate and improve the notes with a focus on problem solving:\n"
+			"- Integrate any genuinely new formulas, concepts, or problem patterns.\n"
+			"- Add or refine step-by-step strategies where the new slides provide more detail.\n"
+			"- Remove redundancy and keep the structure clear and easy to scan.\n"
+			"- Do NOT just repeat the same idea multiple times."
+		)
+
+	updated_notes = call_groq_text(client, prompt)
+	return updated_notes
+
+
+def rolling_batched_summarize(client, slide_summaries, batch_size=SLIDES_PER_BATCH, lecture_name=""):
+    """
+    slide_summaries: list[str] (one per slide, already from vision)
+    Returns final lecture notes as a single string.
+
+    Strategy:
+      - Split slide summaries into batches.
+      - For each batch, refine a running set of global notes.
+    """
+    notes = None
+    batches = list(batch_slide_summaries(slide_summaries, batch_size=batch_size))
+
+    desc = f"{lecture_name} (Text Summarization)" if lecture_name else "Text Summarization"
+    with tqdm(total=len(batches), desc=desc, unit="batch") as pbar:
+        for batch_idx, batch in enumerate(batches, start=1):
+            pbar.set_postfix_str(f"Batch {batch_idx}")
+            notes = refine_notes_with_batch(client, notes, batch)
+            pbar.update(1)
+
+    return notes
+
 
 def process_pdf(pdf_path, client):
 	lecture_name = os.path.splitext(os.path.basename(pdf_path))[0]
@@ -131,20 +226,24 @@ def process_pdf(pdf_path, client):
 		print(f'No valid slides found in {pdf_path}.')
 		return
 	slide_summaries = []
-	total_steps = len(img_paths) + 1  # slides + final summary
-	with tqdm(total=total_steps, desc=f"{lecture_name} (Slide Summarization)", unit="step") as pbar:
+
+	# Vision phase
+	with tqdm(total=len(img_paths), desc=f"{lecture_name} (Slide Summarization)", unit="slide") as pbar:
 		for idx, img_path in enumerate(img_paths):
 			pbar.set_description(f"{lecture_name} (Slide {idx+1} Summarization)")
 			summary = call_groq_vision(client, img_path)
 			slide_summaries.append(f'Slide {idx+1}: {summary}')
 			pbar.set_postfix_str(f"Slide {idx+1}")
 			pbar.update(1)
-		# Aggregate summaries
-		summary_block = '\n'.join(slide_summaries)
-		pbar.set_description(f"{lecture_name} (Final Summary)")
-		lecture_notes = call_groq_text(client, summary_block)
-		pbar.set_postfix_str("Final summary")
-		pbar.update(1)
+
+	# Batched rolling text summarization (with tqdm)
+	lecture_notes = rolling_batched_summarize(
+		client,
+		slide_summaries,
+		batch_size=SLIDES_PER_BATCH,
+		lecture_name=lecture_name
+	)
+
 	# Write output
 	out_path = os.path.join(SUMMARY_DIR, f'{lecture_name}.md')
 	with open(out_path, 'w') as f:
@@ -157,6 +256,7 @@ def process_pdf(pdf_path, client):
 			f.write(f'### Slide {idx+1}\n\n')
 			f.write(summary.replace(f'Slide {idx+1}: ', '') + '\n\n')
 	print(f'  Output written to {out_path}')
+
 	# Clean up images
 	for img_path in img_paths:
 		try:
