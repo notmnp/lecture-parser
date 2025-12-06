@@ -2,63 +2,116 @@
 
 ## Study Notes
 
-# Curl & Stokes’s Theorem – Problem‑Solving Exam Notes
+# Curl & Stokes / Green – Problem‑Solving Exam Notes
 
 ---
 
 ## Core Formulas & Definitions
 
-| Formula | What the symbols mean | When you use it |
-|---------|-----------------------|-----------------|
-| **Curl (vector)** | $$\nabla \times \mathbf{F}= \begin{vmatrix} \mathbf{i} & \mathbf{j} & \mathbf{k}\\ \partial_x & \partial_y & \partial_z\\ P & Q & R \end{vmatrix}$$ | Find local rotation density of \(\mathbf{F}=P\,\mathbf{i}+Q\,\mathbf{j}+R\,\mathbf{k}\). |
-| **Expanded curl** | $$\nabla \times \mathbf{F}= (\partial_y R-\partial_z Q)\,\mathbf{i}
-+(\partial_z P-\partial_x R)\,\mathbf{j}
-+(\partial_x Q-\partial_y P)\,\mathbf{k}$$ | When the determinant is cumbersome; compute component‑wise. |
-| **Zero‑curl (irrotational)** | $$\nabla \times \mathbf{F}=\mathbf{0}$$ | If everywhere true in a simply‑connected region, \(\mathbf{F}\) is conservative. |
-| **Stokes’s Theorem** | $$\oint_C \mathbf{F}\!\cdot d\mathbf{r}
-   =\iint_S (\nabla \times \mathbf{F})\!\cdot \mathbf{n}\,d\sigma$$ | Convert a closed‑curve line integral to a surface integral over any oriented surface \(S\) bounded by \(C\). |
-| **Orientation rule** | *Positive (right‑hand) orientation*: walk along \(C\) with \(\mathbf{n}\) pointing outward; the surface must be to your left. | Determines the sign of the surface integral and the resulting line integral. |
-| **Green’s Theorem** | $$\oint_C (P\,dx+Q\,dy)=\iint_D\!\left(\partial_x Q-\partial_y P\right)\,dA$$ | Special case of Stokes for planar curves in the \(xy\)-plane; useful for 2‑D line integrals. |
+| Formula | Symbols & Meaning | When to Use |
+|---------|-------------------|-------------|
+| **Curl (3‑D)**<br>$$\nabla \times \mathbf{F}= \begin{vmatrix}\hat{\imath}&\hat{\jmath}&\hat{k}\\ \partial_x&\partial_y&\partial_z\\ P&Q&R\end{vmatrix}$$ | • $\mathbf{F}=P\,\hat{\imath}+Q\,\hat{\jmath}+R\,\hat{k}$  <br>• $\partial_x=\partial/\partial x$, etc. <br>• Unit vectors $\hat{\imath},\hat{\jmath},\hat{k}$ | Compute local rotation; test for irrotationality ($\nabla\times\mathbf{F}=0$). |
+| **Curl (2‑D, scalar)**<br>$$\operatorname{curl}_k \mathbf{F}= \partial_x Q-\partial_y P$$ | • $\mathbf{F}=P\,\hat{\imath}+Q\,\hat{\jmath}$ in the $xy$–plane. | Evaluate planar field rotation; feed into Green’s Theorem. |
+| **Stokes’ Theorem**<br>$$\oint_{\partial S}\mathbf{F}\!\cdot\! d\mathbf{r}= \iint_S (\nabla\times\mathbf{F})\!\cdot\! \hat{\mathbf{n}}\, d\sigma$$ | • $S$: smooth, oriented surface. <br>• $\partial S$: positively oriented boundary curve (right‑hand rule). <br>• $\hat{\mathbf{n}}$: unit normal. | Convert a closed line integral into a surface integral of the curl. |
+| **Green’s Theorem (circulation form)**<br>$$\oint_{C}\mathbf{F}\!\cdot\! d\mathbf{r}= \iint_D (\partial_x Q-\partial_y P)\, dA$$ | • $C$: simple, positively oriented curve in the $xy$–plane. <br>• $D$: region bounded by $C$. | Fast evaluation of planar line integrals; the integrand is the scalar curl. |
+| **Irrotational Field**<br>$$\nabla\times\mathbf{F}= \mathbf{0}$$ | • No local rotation; the field is locally conservative. | Determines if $\oint \mathbf{F}\cdot d\mathbf{r}=0$ in any simply connected region. |
+| **Conservative Field (in simply connected domain)**<br>$$\mathbf{F}=\nabla\phi \quad\Longleftrightarrow\quad \nabla\times\mathbf{F}=0$$ | • $\phi$: scalar potential. | Guarantees path independence; shortcut for many integrals. |
 
 ---
 
 ## Key Concepts & Intuition
 
-- **Curl** quantifies *local* circulation density; non‑zero curl does **not** imply global circulation.
-- **Irrotational** fields satisfy \(\nabla \times \mathbf{F}=\mathbf{0}\) everywhere in a simply‑connected region → conservative, path‑independent integrals.
-- **Stokes’s Theorem** equates *global* circulation around a boundary to the *net* rotation over the enclosed surface.
-- **Orientation** is critical: flipping the normal \(\mathbf{n}\) or the traversal direction of \(C\) changes the sign.
-- **Green’s Theorem** is Stokes in the plane; it replaces a line integral with an area integral of \(\partial_x Q-\partial_y P\).
+- **Curl ≠ Divergence** – Curl checks for rotation; divergence checks for sources/sinks.  
+- **Orientation** – Right‑hand rule: thumb along $\hat{\mathbf{n}}$, fingers curl in the direction of the curve. Wrong orientation flips sign.  
+- **Smooth, Oriented Surface** – Must be differentiable; its boundary must match the given curve.  
+- **Planar Specialization** – In the $xy$–plane, only the $k$–component of the curl matters; Stokes reduces to Green.  
+- **Irrotational ⇔ Zero Curl** – In a simply connected domain, this is equivalent to being conservative.  
+- **Green’s Circulation‑Curl Form** – “Tangential” form; the scalar curl appears as the integrand.
 
 ---
 
 ## Problem‑Solving Strategies
 
-| Problem type | Typical cues | Step‑by‑step checklist |
-|--------------|--------------|------------------------|
-| **Compute curl of \(\mathbf{F}\)** | “Find \(\nabla\times\mathbf{F}\)” | 1. Write \(\mathbf{F}=P\mathbf{i}+Q\mathbf{j}+R\mathbf{k}\). 2. Use determinant or expanded formula. 3. Simplify. |
-| **Check if \(\mathbf{F}\) is irrotational** | “Is \(\mathbf{F}\) irrotational?”, “\(\nabla\times\mathbf{F}=\mathbf{0}\)?” | 1. Compute curl. 2. Verify zero everywhere in the region. 3. Ensure the region is simply connected (else further checks needed). |
-| **Determine if \(\mathbf{F}\) is conservative** | “Is \(\mathbf{F}\) a gradient?” | 1. Verify irrotationality. 2. Confirm the domain is simply connected. |
-| **Apply Stokes to evaluate a line integral** | “Evaluate \(\oint_C\mathbf{F}\!\cdot d\mathbf{r}\)” | 1. Identify \(C\) and choose a convenient bounding surface \(S\). 2. Confirm \(S\) is smooth and oriented to give *positive* boundary. 3. Compute \(\nabla\times\mathbf{F}\). 4. Set up \(\iint_S (\nabla\times\mathbf{F})\!\cdot\mathbf{n}\,d\sigma\). 5. Evaluate the double integral. |
-| **Use Stokes for a surface integral** | “Compute \(\iint_S (\nabla\times\mathbf{F})\!\cdot\mathbf{n}\,d\sigma\)” | 1. Recognize it equals \(\oint_{\partial S}\mathbf{F}\!\cdot d\mathbf{r}\). 2. Evaluate the line integral instead (often easier). |
-| **Apply Green’s Theorem** | “Planar curve \(C\) in \(xy\)-plane”, “\(P\,dx+Q\,dy\)” | 1. Compute \(\partial_x Q-\partial_y P\). 2. Sketch region \(D\) bounded by \(C\). 3. Set up \(\iint_D (\partial_x Q-\partial_y P)\,dA\). 4. Evaluate. |
-| **Check orientation** | “Positive orientation”, “right‑hand rule” | 1. Choose \(\mathbf{n}\). 2. Use right‑hand rule to verify traversal of \(C\). 3. If reversed, flip the sign of the result. |
+### 1.  Evaluate a Closed Line Integral
+
+| Step | Action | Check |
+|------|--------|-------|
+| **1. Identify field type** | 3‑D or 2‑D? | If 2‑D → use Green. |
+| **2. Test for conservativeness** | Compute $\nabla\times\mathbf{F}$; if zero and domain simply connected → integral = 0. | Verify simply connectedness (no holes). |
+| **3. Choose an approach** | • Use Stokes/Green if curl is simpler. <br>• Use parameterization of the curve directly if the integral is simple. | Compare effort. |
+| **4. For Stokes/Green** | • Compute the curl. <br>• Parameterize the surface/region. <br>• Compute $\hat{\mathbf{n}}\,d\sigma$ (planar: $dA$, non‑planar: $|\mathbf{r}_u\times\mathbf{r}_v|\,du\,dv$). | Confirm orientation via right‑hand rule. |
+| **5. Evaluate the surface integral** | Perform the double integral, simplify algebraically. | Watch for symmetry that kills the integral. |
+| **6. Verify sign** | Check orientation of the chosen normal against the curve direction. | Flip if result negative but should be positive (or vice‑versa). |
+
+### 2.  Compute the Curl of a Field
+
+| Step | Action |
+|------|--------|
+| **1. Write components** | $P(x,y,z)$, $Q(x,y,z)$, $R(x,y,z)$ (set $R=0$ for 2‑D). |
+| **2. Apply determinant or expanded formula** | Use the compact determinant or component‑wise differences. |
+| **3. Simplify** | Combine like terms; cancel zero derivatives. |
+| **4. Interpret** | Non‑zero vector → local rotation; zero vector → irrotational. |
+
+### 3.  Apply Green’s Theorem (Planar)
+
+| Step | Action |
+|------|--------|
+| **1. Confirm planar curve** | $C$ lies in $xy$–plane; simple and closed. |
+| **2. Identify $P,Q$** | Extract from $\mathbf{F}=P\,\hat{\imath}+Q\,\hat{\jmath}$. |
+| **3. Compute scalar curl** | $\partial_x Q-\partial_y P$. |
+| **4. Set up area integral** | $\iint_D (\partial_x Q-\partial_y P)\,dA$; choose coordinates or symmetry. |
+| **5. Integrate** | Evaluate over $D$. |
+| **6. Check orientation** | Counter‑clockwise traversal → positive orientation; otherwise flip sign. |
+
+### 4.  Verify Orientation in Practice
+
+- **Right‑hand rule**: Thumb → $\hat{\mathbf{n}}$; fingers → boundary direction.  
+- **Cross‑product check**: If two tangent vectors $\mathbf{T}_1,\mathbf{T}_2$ on $S$, then $\hat{\mathbf{n}}\propto\mathbf{T}_1\times\mathbf{T}_2$.  
+- **Parametric surface**: If $\mathbf{r}(u,v)$, normal is $\mathbf{r}_u\times\mathbf{r}_v$; orientation is given by order of $u,v$.  
+- **Curve parametrization**: For $\mathbf{r}(t)$, orientation is direction of increasing $t$.
 
 ---
 
 ## Common Pitfalls & Checks
 
-| Pitfall | How to avoid/check |
-|---------|--------------------|
-| Wrong normal vector | Verify \(\mathbf{n}\) points outward and matches the chosen orientation of \(C\). |
-| Surface vs. boundary confusion | Remember: Stokes relates the line integral around *\(C\)* to the surface integral over *\(S\)* bounded by *\(C\)*. |
-| Ignoring domain connectivity | If \(\nabla\times\mathbf{F}=\mathbf{0}\) but the domain is not simply connected, the field may still be non‑conservative. |
-| Incorrect limits | Sketch the region first; use appropriate bounds for \(x,y,z\). |
-| Sign errors from orientation | After integration, double‑check the orientation; reverse sign if necessary. |
-| Mixing up curl and divergence | Curl gives rotation; divergence gives flux. |
-| Over‑simplifying the surface | Any \(S\) bounded by \(C\) works; choose the one that makes the integrand easiest (often a plane). |
+| Pitfall | Fix |
+|---------|-----|
+| Wrong normal direction | Re‑draw surface; re‑apply right‑hand rule. |
+| Using non‑planar $d\sigma$ as $dA$ | Compute $|\mathbf{r}_u\times\mathbf{r}_v|$ for curved surfaces. |
+| Ignoring $R$ component in 3‑D curl | Include all components; even zero $R$ affects partials. |
+| Assuming any zero curl ⇒ conservative | Confirm domain is simply connected. |
+| Flipping curve orientation | Verify $t$ increase direction or use counter‑clockwise test. |
+| Mixing up $\partial_x$ and $\partial_y$ in scalar curl | Double‑check signs: $\partial_x Q - \partial_y P$. |
+| Reversing integration limits in surface parameterization | Ensure $u,v$ bounds match the region orientation. |
 
 ---
+
+## Quick Reference Checklist
+
+- **Field dimension?**  
+  - 3‑D → full curl & Stokes.  
+  - 2‑D → scalar curl & Green.  
+- **Is the curl zero?**  
+  - If yes and domain simply connected → integral = 0.  
+- **Can we use a theorem?**  
+  - Yes → set up surface/region integral.  
+- **Is the chosen normal correct?**  
+  - Right‑hand rule + cross‑product consistency.  
+- **Do the partial derivatives look messy?**  
+  - Look for symmetry or coordinate change (e.g., polar).  
+- **Orientation mismatch?**  
+  - Reverse sign.  
+
+---
+
+**Example Quick Flow:**  
+1. **Line integral given** → Compute curl.  
+2. **Curl non‑zero** → Choose Stokes/Green.  
+3. **Parameterize surface** → Compute normal and area element.  
+4. **Integrate** → Simplify algebra.  
+5. **Check sign** → Adjust if needed.  
+
+Good luck with the exam!
 
 ---
 
@@ -66,190 +119,211 @@
 
 ### Slide 1
 
-The image is a slide from a presentation about the concept of curl and Stoke's Theorem, likely for a university course. The slide is titled "Curl and the Stokes's Theorem" in large black text at the top.
+The image is a presentation slide titled "Curl and the Stokes's Theorem" in large black text at the top. 
 
-*   **Title and Reference**
-    *   The title is followed by a yellow box with the text "Trim Ch 14, 14.1, 14.10" in black.
-*   **Image**
-    *   To the right of the title, there is an image of a sailboat on rough seas.
-    *   The image shows Pascal Oddo's Leopard 3 in rough seas during the 2017 Rolex Middle Sea Race.
-    *   The URL for the image is provided below the image: https://i.imgur.com/30iDYV3.jpg
-*   **Outline**
-    *   Below the title, there is an outline of the topics to be covered:
-        *   The Concept of Curl
-        *   Stoke's Theorem
-*   **University Logo**
-    *   At the bottom-left corner of the slide, there is a logo for the University of Waterloo.
-    *   The logo features a shield with a red and yellow design, accompanied by the university's name in black text.
+* The title is followed by a yellow box with black text that reads "Trim Ch 14, 14.1, 14.10".
+* Below this, there is an outline with two points: 
+  1. "The Concept of Curl"
+  2. "Stoke's Theorem"
+* To the right of the outline, there is a photograph of a sailboat on rough seas, with a red rectangle highlighting a section of the water.
+* At the bottom of the slide, there is a logo for the University of Waterloo, accompanied by a caption that reads: "Pascal Oddo's Leopard 3 in rough seas during the 2017 Rolex Middle Sea Race (https://i.imgur.com/30iDYV3.jpg)".
+* The background of the slide is white, with a black and yellow border at the top.
 
-The slide provides a clear and concise overview of the topics to be covered, along with a relevant image to engage the audience.
+The slide appears to be part of a lecture or presentation on vector calculus, specifically covering the topics of curl and Stokes' theorem.
 
 ### Slide 2
 
-The image presents a slide from a presentation on the concept of curl, featuring two graphs and explanatory text. The title "The Concept of Curl" is prominently displayed at the top-left corner.
+The image presents a detailed diagram illustrating the concept of curl in fluid dynamics, featuring handwritten notes and equations on a white background.
 
-*   **Title and Subtitle**
-    *   The title "The Concept of Curl" is written in large black font.
-    *   Below the title, the subtitle "Suppose we have a velocity field F = y^2 i" is written in smaller black font.
-*   **Graphs**
-    *   Two graphs are presented side-by-side, each with a blue x-axis and y-axis.
-    *   The left graph features arrows pointing to the right, increasing in length as they move up the y-axis.
-    *   The right graph displays arrows pointing to the left and right, with those on the left side pointing left and those on the right side pointing right.
-*   **Text Below Graphs**
-    *   The text "The curl (F) is a measure of how much F is rotating" is written in black font below the graphs.
-*   **University Logo**
-    *   The University of Waterloo logo is displayed in the bottom-right corner, featuring a shield with a red and yellow design and the university's name in black font.
+**Title**
+At the top center, the title "The Concept of Curl" is prominently displayed in large black text.
 
-In summary, the image effectively illustrates the concept of curl through visual representations and concise explanatory text, providing a clear understanding of the topic.
+**Diagrams**
+Two diagrams are presented side by side, each with its own set of annotations. The left diagram depicts a graph with a blue x-axis and y-axis, accompanied by arrows indicating the direction of water flow. A red vertical line is drawn along the y-axis, while a green diagonal line intersects the x-axis. The annotations highlight the movement of water to the right, with increasing speed as it moves further to the right. The diagram also includes the equation "F = y^2 i" and notes that "water is moving to the right but faster" and "if F changes in the 'x' direction -> net torque on twig." A blue arrow points to the text "The curl (F) is a measure of how much F is rotating."
+
+The right diagram shows a similar graph with a blue x-axis and y-axis, featuring a red curved line that illustrates the concept of net torque or "curl." The annotations emphasize that "net torque or 'curl' is larger."
+
+**Logo**
+In the bottom-right corner, the logo for the University of Waterloo is displayed, consisting of a black shield with a gold crest and the university's name written in black text.
+
+**Background**
+The image features a white background with a yellow stripe at the top.
+
+Overall, the image effectively conveys complex concepts related to fluid dynamics and curl, making it a valuable resource for students and professionals in the field.
 
 ### Slide 3
 
-The image is a slide from a presentation on vector calculus, specifically defining the curl of a vector field. The slide is titled "Definition of Curl" and features the University of Waterloo logo in the bottom-right corner.
+The image presents a slide from a presentation on vector calculus, specifically focusing on the definition of curl. The title "Definition of Curl" is prominently displayed at the top in bold black text.
 
-**Title and Content**
+Below the title, the main content is organized into three sections:
 
-* The title "Definition of Curl" is prominently displayed in large black text at the top of the slide.
-* Below the title, a definition is provided: "For a vector field $\vec{F} = P\hat{i} + Q\hat{j} + R\hat{k}$, the curl is defined as, $\operatorname{CURL}(\vec{F}) = \vec{\nabla} \times \vec{F}$."
-* The slide then explains how to compute the curl using a determinant: "To compute the $\operatorname{CURL}(\vec{F})$, we perform the determinant, $\operatorname{CURL}(\vec{F}) = \begin{vmatrix} \hat{i} & \hat{j} & \hat{k} \\ \frac{\partial}{\partial x} & \frac{\partial}{\partial y} & \frac{\partial}{\partial z} \\ P & Q & R \end{vmatrix}$."
+**Section 1: Definition**
+The first section defines the curl of a vector field $\vec{F} = P\hat{i} + Q\hat{j} + R\hat{k}$ as $\text{CURL}(\vec{F}) = \vec{\nabla} \times \vec{F}$.
 
-**Mathematical Formula**
+**Section 2: Computation**
+The second section explains how to compute the curl using the determinant formula:
+$\text{CURL}(\vec{F}) = \begin{vmatrix} \hat{i} & \hat{j} & \hat{k} \\ \frac{\partial}{\partial x} & \frac{\partial}{\partial y} & \frac{\partial}{\partial z} \\ P & Q & R \end{vmatrix}$.
 
-* The formula for the curl is expanded as: "$\operatorname{CURL}(\vec{F}) = \left(\frac{\partial R}{\partial y} - \frac{\partial Q}{\partial z}\right)\hat{i} + \left(\frac{\partial P}{\partial z} - \frac{\partial R}{\partial x}\right)\hat{j} + \left(\frac{\partial Q}{\partial x} - \frac{\partial P}{\partial y}\right)\hat{k}$."
+**Section 3: Expanded Formula**
+The third section provides the expanded formula for the curl:
+$\text{CURL}(\vec{F}) = \left(\frac{\partial R}{\partial y} - \frac{\partial Q}{\partial z}\right)\hat{i} + \left(\frac{\partial P}{\partial z} - \frac{\partial R}{\partial x}\right)\hat{j} + \left(\frac{\partial Q}{\partial x} - \frac{\partial P}{\partial y}\right)\hat{k}$.
 
-**Visual Elements**
-
-* The slide features a white background with a yellow and black border at the top.
-* The University of Waterloo logo is displayed in the bottom-right corner, consisting of a shield with a red and yellow design, accompanied by the university's name in black text.
-
-Overall, the slide provides a clear and concise definition of the curl of a vector field, along with the necessary mathematical formulas to compute it.
+In the bottom-right corner, the logo of the University of Waterloo is visible, featuring a shield with a red and yellow design, accompanied by the university's name in black text. The background of the slide is white, with a yellow stripe at the top and a black stripe above it.
 
 ### Slide 4
 
-The image presents a slide from a presentation on the topic of "Making Sense of the Curl," which appears to be related to vector calculus. The slide features two diagrams and accompanying text, providing a detailed explanation of the concept.
+The image presents a slide from a presentation on the topic of "Making Sense of the Curl" in the context of vector calculus, specifically focusing on the circulation of a vector field around closed paths.
 
-* **Title and Text**
-	+ The title "Making Sense of the Curl" is prominently displayed at the top of the slide in large black font.
-	+ Below the title, a paragraph of text explains that the slide will calculate the total counter-clockwise circulation of a vector field along closed paths.
-	+ The text is written in black font and includes mathematical notation, specifically the integral symbol and the dot product of two vectors.
-* **Diagrams**
-	+ Two identical diagrams are presented side by side, each consisting of a green surface with purple arrows indicating the direction of the vector field.
-	+ The diagrams are labeled with x, y, and z axes, providing a clear visual representation of the 3D coordinate system.
-	+ The surfaces are oriented in different directions, with the left diagram showing the surface facing upwards and the right diagram showing it facing downwards.
-* **University Logo**
-	+ In the bottom-right corner of the slide, the logo of the University of Waterloo is displayed, featuring a yellow shield with a red cross and a black border.
-	+ The university's name is written in black font next to the logo.
+*   The title "Making Sense of the Curl" is prominently displayed at the top of the slide.
+    *   It is followed by a brief introduction that sets the stage for the discussion: "Let us suppose that we want to calculate the total counter-clockwise circulation $\oint_{C} \vec{F} \cdot d\vec{r}$ on the following closed paths."
+*   Two diagrams are presented side by side to illustrate the concept.
+    *   Both diagrams feature a green curve representing the closed path $C$, with arrows indicating the direction of traversal.
+    *   The diagrams also include purple arrows to represent the vector field $\vec{F}$ and a red rectangle to symbolize an object being pushed or rotated by the field.
+    *   The left diagram shows the object being pushed without rotation, resulting in zero circulation ($\oint_{C} \vec{F} \cdot d\vec{r} = 0$) and zero curl ($\text{curl} \vec{F} = 0$).
+    *   In contrast, the right diagram depicts the object being rotated, leading to positive circulation ($\oint_{C} \vec{F} \cdot d\vec{r} > 0$) and positive curl ($\text{curl} \vec{F} > 0$).
+*   The University of Waterloo logo is displayed in the bottom-right corner of the slide.
 
-In summary, the slide provides a clear and concise explanation of the concept of curl in vector calculus, using visual diagrams and mathematical notation to illustrate the idea. The inclusion of the University of Waterloo logo suggests that the presentation is part of a course or lecture series at the institution.
+In summary, the slide effectively illustrates the relationship between the circulation of a vector field around a closed path and the curl of the field, using visual aids to facilitate understanding of these fundamental concepts in vector calculus.
 
 ### Slide 5
 
-The image is a slide from a presentation on vector calculus, specifically focusing on the concept of curl.
+The image is a slide from a presentation on vector calculus, specifically discussing Stokes' Theorem. The title of the slide is "Making Sense of the Curl" and it features a diagram and mathematical equations.
 
-*   The title of the slide is "Making Sense of the Curl" in large black text at the top.
-*   Below the title, there is a paragraph of text that reads: "Let us suppose that we want to calculate the total counter-clockwise circulation $\oint_{C} \vec{F} \cdot d\vec{r}$ on the following closed paths."
-*   A 3D diagram is shown below the text, illustrating a green-outlined surface with purple arrows indicating the direction of the vector field $\vec{F}$ on the surface. The surface is oriented in 3D space, with x, y, and z axes labeled.
-    *   The x-axis is pointing to the left and down.
-    *   The y-axis is pointing to the right.
-    *   The z-axis is pointing upwards.
-*   The diagram is accompanied by the University of Waterloo logo in the bottom-right corner, indicating the institution associated with the presentation.
+*   The title is in large black text at the top of the slide, with the subtitle "Let us suppose that we want to calculate the total counter-clockwise circulation $\oint_{C} \vec{F} \cdot d\vec{r}$ on the following closed paths." written below it in smaller text.
+    *   The title is centered and takes up two lines.
+    *   The subtitle is also centered and takes up two lines.
+*   A diagram is shown on the left side of the slide, illustrating a closed curve $C$ enclosing a surface $S$.
+    *   The diagram is hand-drawn in green, blue, and purple ink.
+    *   The curve $C$ is represented by a green line, with arrows indicating the direction of integration.
+    *   The surface $S$ is represented by a blue grid, with purple arrows indicating the direction of the normal vector.
+    *   The diagram is labeled with various symbols, including $x$, $y$, and $z$, which represent the coordinates of the points on the curve and surface.
+*   To the right of the diagram, several mathematical equations are written in red and green ink.
+    *   The first equation is Stokes' Theorem, which relates the line integral of a vector field around a closed curve to the surface integral of the curl of the vector field over the surface enclosed by the curve.
+    *   The equation is written as $\oint_{C} \vec{F} \cdot d\vec{r} = \iint_{S} (\nabla \times \vec{F}) \cdot \hat{n} d\sigma$.
+    *   Below this equation, there are several other equations and notes that provide additional context and explanation.
+    *   The equations include the value of the line integral over $C$, the sum of all curls over "S" in the normal direction, and the curl of $\vec{F}$.
+*   At the bottom-right corner of the slide, there is a logo for the University of Waterloo.
+    *   The logo features a shield with a crest and the words "UNIVERSITY OF WATERLOO" written next to it.
 
-In summary, the image presents a visual representation of a vector field and its circulation around a closed path, which is a fundamental concept in vector calculus. The diagram provides a clear illustration of the vector field's direction and magnitude on the surface, while the text provides context and explanation for the concept being discussed.
+Overall, the slide provides a clear and concise explanation of Stokes' Theorem and its application to calculating the circulation of a vector field around a closed curve. The diagram and equations work together to illustrate the concept and provide a step-by-step guide to applying the theorem.
 
 ### Slide 6
 
-The image presents a slide from a presentation on Stokes's Theorem, featuring a white background with black text and a yellow bar at the top.
-
-*   **Title**: 
-    *   "Stokes's Theorem" is written in large black font.
-*   **Text**:
-    *   The first paragraph defines S as an oriented piece-wise smooth surface bounded by a simple, close, piecewise smooth boundary curve C with positive orientation.
-    *   The second paragraph introduces F as a vector field whose components have continuous partial derivatives on an open region containing S.
-    *   The third paragraph states that the line integral of F around C equals the double integral of the curl of F over S.
-*   **Mathematical Equation**:
-    *   The equation is presented as: ∮C F · dr = ∬S (∇ × F) · n dσ
-*   **Diagram**:
-    *   A green curved surface is depicted, bounded by a green curve.
-    *   Purple arrows are scattered across the surface, representing the vector field F.
-    *   A blue arrow labeled "x" points to the left, while another blue arrow labeled "y" points to the right.
-    *   A blue arrow labeled "z" points upwards.
-    *   The diagram illustrates the concept of Stokes's Theorem, showing how the line integral around the boundary curve relates to the surface integral over the enclosed surface.
-*   **Logo**:
-    *   The University of Waterloo logo is displayed in the bottom-right corner, featuring a shield with a red and yellow design and the university's name in black text.
-
-In summary, the image effectively conveys the concept of Stokes's Theorem through a clear and concise explanation, accompanied by a visual representation that helps to illustrate the theorem's application.
-
-### Slide 7
-
-The image is a slide from a presentation about Stokes's Theorem and Surface Orientation. 
-
-*   The title of the slide is "Stokes's Theorem and Surface Orientation" in large black text at the top.
-*   Below the title, there is a sentence that reads, "To use Stoke's Theorem correctly we need to make sure that we are using the correct orientation."
-*   There are two diagrams on the slide, both showing a green surface labeled "S" with a purple curve labeled "C" around it.
-    *   The diagrams are identical except for the direction of the curve C.
-    *   The surface S is a dome-shaped surface with a curved boundary C.
-    *   The normal vector n is shown pointing outward from the surface.
-*   Below the diagrams, there is a paragraph of text that explains how to induce positive orientation on the curve C.
-    *   It states that if we pick n as the normal vector, we need to "walk" along C in a way so that our head is pointing in the direction of n, and the surface S is to our left.
-*   In the bottom-right corner of the slide, there is a logo for the University of Waterloo.
-
-Overall, the slide appears to be discussing the importance of orientation when applying Stokes's Theorem, and how to determine the correct orientation for a given surface and curve.
-
-### Slide 8
-
-The image presents a slide from a presentation on Stokes's Theorem and Green's Theorem, featuring a white background with black text and various mathematical equations and diagrams.
+The image presents a slide from a presentation on Stokes's Theorem, featuring a title, a mathematical definition, and an accompanying diagram. The content is as follows:
 
 **Title**
-The title, "Stokes's Theorem and Green's Theorem," is prominently displayed in large, bold black font at the top of the slide.
+* "Stokes's Theorem" in large black text at the top left of the slide.
 
-**Text and Equations**
+**Mathematical Definition**
 
-* Below the title, the text "Stokes's Theorem is given by" is written in smaller black font.
-* The equation for Stokes's Theorem is presented: ∮C F · d**r** = ∬S (∇ × F) · **n** dσ
-* The text "Let us look at a curve C in the x-y plane" is written below the equation.
+* A paragraph explaining the theorem:
+	+ Let S be an oriented piece-wise smooth surface that is bounded by a simple, close, piecewise smooth boundary curve C with positive orientation.
+	+ Let $\vec{F}$ be a vector field whose components have continuous partial derivatives on an open region that contains S.
+	+ Then, $\oint_{C} \vec{F} \cdot d\vec{r} = \iint_{S} (\nabla \times \vec{F}) \cdot \hat{n} d\sigma$
 
 **Diagram**
 
-* A 3D coordinate system is illustrated, with the x, y, and z axes labeled.
-* A green oval shape is drawn in the x-y plane, representing the curve C.
-* Blue arrows are scattered throughout the diagram, indicating the direction of the vector field F.
-* The equation F = P**i** + Q**j** is written next to the diagram, with P and Q being functions of x and y.
-* The curve C is parameterized by the equation **r**(t) = x(t)**i** + y(t)**j**, where t is a parameter.
+* A 3D graph with a green surface S and a red curve C on the right side of the slide.
+* The surface S is oriented with purple arrows indicating its normal vector.
+* The curve C is oriented counterclockwise when viewed from above.
+* A blue arrow labeled "z" points upwards from the origin.
+* A blue "x" and a blue "y" are shown at the end of two blue arrows pointing to the right and out of the page, respectively.
 
-**Logo and Institution**
+**University Logo**
 
-* In the bottom-right corner of the slide, the logo for the University of Waterloo is displayed, accompanied by the institution's name in black text.
+* The University of Waterloo logo is displayed in the bottom-right corner of the slide.
 
-Overall, the slide provides a clear and concise introduction to Stokes's Theorem and Green's Theorem, along with a visual representation of the concepts using a 3D coordinate system and a diagram illustrating the curve C in the x-y plane.
+This slide provides a concise overview of Stokes's Theorem, including its mathematical formulation and a visual representation of the concepts involved.
+
+### Slide 7
+
+The image presents a slide from a presentation on Stokes' Theorem and Surface Orientation, featuring two diagrams that illustrate the concept of orientation in relation to the theorem.
+
+*   The title "Stokes's Theorem and Surface Orientation" is prominently displayed at the top of the slide.
+    *   The title is written in bold black text.
+*   A paragraph below the title explains the importance of using the correct orientation when applying Stokes' Theorem.
+    *   The text is written in black font.
+    *   It states, "To use Stoke's Theorem correctly we need to make sure that we are using the correct orientation."
+*   Two diagrams are presented side-by-side, each depicting a surface S bounded by a curve C.
+    *   The diagrams are hand-drawn and feature green lines representing the surface S and purple lines representing the curve C.
+    *   A stick figure is shown walking along the curve C in both diagrams.
+    *   In the left diagram, the stick figure is walking in a counterclockwise direction, while in the right diagram, it is walking in a clockwise direction.
+    *   The left diagram is labeled "Positive Orientation," indicating that the orientation of the curve C is positive.
+    *   The right diagram is also labeled "Positive Orientation," but with an additional notation indicating that the normal vector n̂ points outward from the surface S.
+*   A paragraph below the diagrams provides further explanation of the concept of positive orientation.
+    *   The text is written in black font.
+    *   It states, "If we pick n̂ as the normal vector, to induce positive orientation on the curve C, we need to 'walk' along C in a way so that our head is pointing in the direction of n̂, and the surface S is to our left."
+*   The University of Waterloo logo is displayed in the bottom-right corner of the slide.
+    *   The logo features the university's name in black text, accompanied by a crest or emblem.
+
+In summary, the slide effectively illustrates the concept of surface orientation in relation to Stokes' Theorem, using clear and concise language and visual aids to convey the information.
+
+### Slide 8
+
+The image presents a lecture slide on Stokes's Theorem and Green's Theorem, featuring a detailed diagram and mathematical equations. The slide is divided into sections, with the title "Stokes's Theorem and Green's Theorem" prominently displayed at the top.
+
+**Title and Subtitle**
+
+*   **Title:** Stokes's Theorem and Green's Theorem
+*   **Subtitle:** Stokes's Theorem is given by,
+
+**Main Equation**
+
+*   The main equation is: $\oint_{C} \vec{F} \cdot d\vec{r} = \iint_{S} (\vec{\nabla} \times \vec{F}) \cdot \hat{n} d\sigma$
+
+**Text Below the Equation**
+
+*   Let us look at a curve C in the x-y plane,
+
+**Diagram**
+
+*   The diagram is a 3D representation of a curve C in the x-y plane, with arrows indicating the direction of the curve.
+*   The diagram includes various mathematical notations and symbols, such as:
+    *   $\vec{F} = P\hat{i} + Q\hat{j}$
+    *   $\text{CURL}(\vec{F}) = \begin{vmatrix} \hat{i} & \hat{j} & \hat{k} \\ \frac{\partial}{\partial x} & \frac{\partial}{\partial y} & \frac{\partial}{\partial z} \\ P & Q & 0 \end{vmatrix} = (\frac{\partial Q}{\partial x} - \frac{\partial P}{\partial y})\hat{k}$
+    *   $C: \vec{r}(t) = x(t)\hat{i} + y(t)\hat{j}$
+
+**University Logo**
+
+*   The logo of the University of Waterloo is displayed in the bottom-right corner of the slide.
+
+The slide provides a clear and concise explanation of Stokes's Theorem and its application to a curve in the x-y plane, accompanied by a detailed diagram and relevant mathematical equations.
 
 ### Slide 9
 
-The image presents a slide from a presentation on Stokes's Theorem and Green's Theorem, featuring the title "Stokes's Theorem and Green's Theorem" in large black text at the top. The slide is divided into two sections: the top section contains the title, while the bottom section provides additional information.
+The image is a slide from a presentation on Stokes's Theorem and Green's Theorem, featuring handwritten notes in blue ink on a white background. The title, "Stokes's Theorem and Green's Theorem," is prominently displayed at the top in bold black text.
 
-**Top Section:**
+* **Title and Handwritten Notes**
+	+ Title: "Stokes's Theorem and Green's Theorem" in bold black text
+	+ Handwritten notes in blue ink
+* **First Equation**
+	+ $\text{CURL}(\vec{F}) \cdot \hat{k} = \frac{\partial Q}{\partial x} - \frac{\partial P}{\partial y}$
+	+ $\text{CURL}(\vec{F}) \cdot \hat{n}$ (notation below the equation)
+* **Second Equation**
+	+ $\oint_{C} \vec{F} \cdot d\vec{r} = \iint_{R_{xy}} \left(\frac{\partial Q}{\partial x} - \frac{\partial P}{\partial y}\right) dA$
+	+ $dA$ is equivalent to $d\sigma$ for $R_{xy}$ (notation to the right of the equation)
+* **Text Below the Equations**
+	+ "Green's Circulation-Curl or Tangential form is the 2D version of Stokes's Theorem!" in blue text
+* **University Logo**
+	+ University of Waterloo logo in the bottom-right corner
+* **Background and Border**
+	+ White background
+	+ Yellow and black border at the top
 
-*   Title: "Stokes's Theorem and Green's Theorem" in large black text
-*   Yellow bar below the title, spanning the width of the slide
-*   Black bar above the yellow bar, also spanning the width of the slide
-
-**Bottom Section:**
-
-*   Text in blue font: "Green's Circulation-Curl or Tangential form is the 2D version of Stokes's Theorem!"
-*   University of Waterloo logo in the bottom-right corner, consisting of a shield with a red and yellow design, accompanied by the university's name in black text.
-
-The background of the slide is white, providing a clean and neutral backdrop for the content. Overall, the slide effectively conveys the main topic of the presentation and provides a clear visual representation of the relationship between Stokes's Theorem and Green's Theorem.
+The slide presents a concise overview of the relationship between Stokes's Theorem and Green's Theorem, highlighting their connection through handwritten notes and equations.
 
 ### Slide 10
 
-The image presents a summary slide from a presentation on vector calculus, specifically focusing on the concept of curl and Stokes' Theorem. The title "Summary" is prominently displayed at the top left, followed by four bullet points that outline key aspects of the topic.
+The image presents a slide from a presentation on vector calculus, featuring a white background with a black and yellow border at the top. The title "Summary" is prominently displayed in large, bold black text at the top left of the slide.
 
-*   **The curl of a vector field is a measure of how much the vector field is rotating**
-    *   This statement introduces the concept of curl as a measure of rotation in a vector field.
-*   **If the curl of a vector field is zero, the vector field is called "irrotational"**
-    *   This point defines an irrotational vector field as one with zero curl, indicating no rotation.
-*   **The Stokes' Theorem states that the value of a line integral involving vector fields along a closed curve C (also called circulation), is equal to the sum of all the curls over the surface S bounded by that curve.**
-    *   Stokes' Theorem relates the line integral around a closed curve to the surface integral of the curl over the enclosed surface.
-*   **For the Stoke's Theorem to apply, S should be a smooth surface oriented so that it induces a positive orientation of its boundary C**
-    *   This condition specifies that the surface S must be smooth and oriented correctly for Stokes' Theorem to be applicable.
+The main content of the slide consists of four bullet points, each describing a key concept related to vector fields and the Stokes' Theorem:
 
-In summary, the slide provides a concise overview of the curl of a vector field and Stokes' Theorem, highlighting their significance in understanding vector calculus. The University of Waterloo logo is displayed in the bottom right corner, indicating the academic context of the presentation.
+• The curl of a vector field is a measure of how much the vector field is rotating
+• If the curl of a vector field is zero, the vector field is called "irrotational"
+• The Stokes' Theorem states that the value of a line integral involving vector fields along a closed curve C (also called circulation), is equal to the sum of all the curls over the surface S bounded by that curve.
+• For the Stoke's Theorem to apply, S should be a smooth surface oriented so that it induces a positive orientation of its boundary C
+
+In the bottom-right corner of the slide, the logo for the University of Waterloo is visible, indicating the institution associated with the presentation.
+
+Overall, the slide provides a concise summary of important concepts in vector calculus, making it a useful resource for students or professionals looking to review or understand these fundamental ideas.
 
